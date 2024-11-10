@@ -217,14 +217,13 @@ template <typename T> void doubly_linked_list<T>::erase(T const key) {
 				break;
 			}
 			else {	// handle intermediate nodes
-					curr->next->prev = curr->prev;
+				curr->next->prev = curr->prev;
 				curr->prev->next = curr->next;
 			}
 			_size--;
 		}
 		curr = curr->next;
 	}
-
 	if (root->val == key) {	// handle root node
 		root = root->next;
 		if (root == nullptr) {
