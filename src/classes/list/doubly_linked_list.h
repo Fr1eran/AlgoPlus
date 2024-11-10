@@ -87,31 +87,31 @@ public:
    *@param key: the key to be searched.
    *@returns true if key exists in the list.
    */
-  bool search(T key);
+  bool search(T const key) const;
 
   /**
    *@brief push_back function.
    *@param key: the key to be pushed back.
    */
-  void push_back(T key);
+  void push_back(T const key);
 
   /**
    *@brief push_front function.
    *@param key: the key to be pushed in front.
    */
-  void push_front(T key);
+  void push_front(T const key);
 
   /**
    *@brief erase function.
    *@param key: the key to be erased from the list.
    */
-  void erase(T key);
+  void erase(T const key);
 
   /**
    *@brief elements function.
    *@returns vector<T>: the elements of the list.
    */
-  std::vector<T> elements();
+  std::vector<T> elements() const;
 
   /**
    * @brief reverse function.
@@ -159,23 +159,24 @@ private:
   std::string generate();
 };
 
-template <typename T> bool doubly_linked_list<T>::search(T key) {
-  if (this->empty()) {
-    return false;
-  } else {
-    std::shared_ptr<node> t = root;
-    while (t != tail && t->val != key) {
-      t = t->next;
-    }
-    if (t == tail || t == nullptr) {
-      return false;
-    }
-    return true;
-  }
-  return false;
+template <typename T> bool doubly_linked_list<T>::search(T const key) const {
+	if (this->empty()) {
+		return false;
+	}
+	else {
+		std::shared_ptr<node> t = root;
+		while (t != nullptr && t->val != key) {
+			t = t->next;
+		}
+		if (t == nullptr) {
+			return false;
+		}
+		return true;
+	}
+	//return false;
 }
 
-template <typename T> void doubly_linked_list<T>::push_back(T key) {
+template <typename T> void doubly_linked_list<T>::push_back(T const key) {
   std::shared_ptr<node> p = std::make_shared<node>(key);
   if (root == nullptr) {
     root = p;
@@ -189,40 +190,53 @@ template <typename T> void doubly_linked_list<T>::push_back(T key) {
   _size++;
 }
 
-template <typename T> void doubly_linked_list<T>::push_front(T key) {
-  std::shared_ptr<node> p = std::make_shared<node>(key);
-  p->next = root;
-  p->prev = nullptr;
-  if (root != nullptr) {
-    root->prev = p;
-  }
-  root = p;
-  _size++;
+template <typename T> void doubly_linked_list<T>::push_front(T const key) {
+	std::shared_ptr<node> p = std::make_shared<node>(key);
+	p->next = root;
+	p->prev = nullptr;
+	if (root != nullptr) {
+		root->prev = p;
+	}
+	else {
+		tail = p;
+	}
+	root = p;
+	_size++;
 }
 
-template <typename T> void doubly_linked_list<T>::erase(T key) {
-  if (root == nullptr) {
-    return;
-  }
-  if (root->val == key) {
-    root = root->next;
-  }
-  std::shared_ptr<node> head = root;
-  while (head && head->val != key) {
-    head = head->next;
-  }
-  if (head == nullptr) {
-    return;
-  }
-  if (head->next != nullptr) {
-    head->next->prev = head->prev;
-  }
-  if (head->prev != nullptr) {
-    head->prev->next = head->next;
-  }
-}
+template <typename T> void doubly_linked_list<T>::erase(T const key) {
+	if (root == nullptr) {
+		return;
+	}
+	std::shared_ptr<node> curr = root->next;
+	while (curr != nullptr) {
+		if (curr->val == key) {
+			if (curr == tail) {	// handle tail node
+				tail = tail->prev;
+				tail->next = nullptr;
+				break;
+			}
+			else {	// handle intermediate nodes
+					curr->next->prev = curr->prev;
+				curr->prev->next = curr->next;
+			}
+			_size--;
+		}
+		curr = curr->next;
+	}
 
-template <typename T> std::vector<T> doubly_linked_list<T>::elements() {
+	if (root->val == key) {	// handle root node
+		root = root->next;
+		if (root == nullptr) {
+			tail = nullptr;
+		} else {
+			root->prev = nullptr;
+		}
+		_size--;
+	}
+}// after leaving the scope, all objects are deleted
+
+template <typename T> std::vector<T> doubly_linked_list<T>::elements() const {
   std::vector<T> _elements;
   if (this->empty()) {
     return _elements;
